@@ -1,25 +1,25 @@
 rules:
   - name: "Failed SSH Login"
-    pattern:  "Failed password for.*from.*port.*ssh"  
-    severity:  high
+    pattern:  "Failed password for.*from .* port .* ssh"  
+    severity:  "high"
     description:  "Başarısız SSH giriş denemesi"
 
   - name: "invalid user SSH"
     pattern:  "invalid user.*from"
-    severity: high
+    severity: "high"
     description:  "Geçersiz kullanıcı ile SSH giriş denemesi"
 
   - name: "UFW Block"
     pattern:  "UFW BLOCK"
-    severity: medium
+    severity: "medium"
     description:  "UFW tarafından engellenen paket"
 
   - name: "Nginx Error"
     pattern:  '"\s(4\d{2}|5\d{2})\s'
-    severity: medium
+    severity: "medium"
     description:  "Nginx 4xx veya 5xx hata kodu"
 
   - name: "General Error"
-    pattern:  "(error|ERROR|Error)"
-    severity: low
-    descriptoin: "General error kelimesi için satır"
+    pattern:  "error"
+    severity: "low"
+    description: "General error kelimesi için satır"

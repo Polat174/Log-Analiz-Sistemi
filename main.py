@@ -18,7 +18,8 @@ def kural_yukle(kural_dosya="kurallar.yaml"):
             
             kurallar = config['rules']
             for kural in kurallar:
-                kural['re_obj'] = re.compile(kural['pattern'], re.IGNORECASE)
+                if 'pattern' in kural:
+                    kural['re_obj'] = re.compile(kural['pattern'], re.IGNORECASE)
             return kurallar
     except FileNotFoundError:
         print(f"[!] {kural_dosya} dosyası dizinde bulunamadı!")
@@ -43,9 +44,12 @@ def satir_analiz_et(satir, kurallar):
 def rapor_kaydet(tespitler, dosya_adi="Analiz_Raporu.csv"):
     if not tespitler: return
     anahtarlar = tespitler[0].keys()
+
+    dosya_var = os.path.exists(dosya_adi)
     with open(dosya_adi,"a", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=anahtarlar)
-        writer.writeheader()
+        if not dosya_var:
+            writer.writeheader()
         writer.writerows(tespitler)
     print(f"\n[+] Rapor Kaydedildi: {os.path.abspath(dosya_adi)}")
 
@@ -53,17 +57,24 @@ def rapor_kaydet(tespitler, dosya_adi="Analiz_Raporu.csv"):
 class LogIzleyici(FileSystemEventHandler):
     def __init__(self, kurallar):
         self.kurallar = kurallar
+        self.offsets = {}
     def on_modified(self,event):
         if not event.is_directory:
-            with open(event.src_path, "r") as f:
-                satirlar = f.seek(0, os.SEEK_END)
-                if satirlar:
-                    son_satir = satirlar[-1]
-                    sonuc = satir_analiz_et(son_satir, self.kurallar)
+            path = event.src_path
+
+            if path not in self.offsets:
+                self.offsets[path] = 0
+
+            with open(path, "r") as f:
+                f.seek(self.offsets[path])
+                yeni_satirlar = f.readlines()
+                self.offsets[path] = f.tell()
+
+                for satir in yeni_satirlar:
+                    sonuc =satir_analiz_et(satir, self.kurallar)
                     if sonuc:
                         print(f"\n[!] YENİ TESPİT: {sonuc['kural']} ({sonuc['derece']})")
                         print(f"--> {sonuc['mesaj']}")
-
 #--- ANA MENÜ ---
 def menu():
     kurallar = kural_yukle()
