@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  log-analyzer:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: altay_log_monitor
+    volumes:
+      - /var/log:/var/log/host_logs:ro
+      - .:/app
+    stdin_open: true
+    tty: true
