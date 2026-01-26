@@ -22,5 +22,4 @@ rules:
   - name: "General Error"
     pattern:  "(error|ERROR|Error)"
     severity: low
-    descritpoin: "General error kelimesi için satır"
-    
+    descriptoin: "General error kelimesi için satır"

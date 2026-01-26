@@ -43,11 +43,11 @@ def satir_analiz_et(satir, kurallar):
 def rapor_kaydet(tespitler, dosya_adi="Analiz_Raporu.csv"):
     if not tespitler: return
     anahtarlar = tespitler[0].keys()
-    with open(dosya_adi,"w", newline="", encoding="utf-8") as f:
+    with open(dosya_adi,"a", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=anahtarlar)
         writer.writeheader()
-        writer.writerow(tespitler)
-    print(f"\n[+] Rapor Kaydedildi: {dosya_adi}")
+        writer.writerows(tespitler)
+    print(f"\n[+] Rapor Kaydedildi: {os.path.abspath(dosya_adi)}")
 
 #--- GERÇEK ZAMANLI İZLEME (WATCHDOG) ---
 class LogIzleyici(FileSystemEventHandler):
@@ -56,7 +56,7 @@ class LogIzleyici(FileSystemEventHandler):
     def on_modified(self,event):
         if not event.is_directory:
             with open(event.src_path, "r") as f:
-                satirlar = f.readlines()
+                satirlar = f.seek(0, os.SEEK_END)
                 if satirlar:
                     son_satir = satirlar[-1]
                     sonuc = satir_analiz_et(son_satir, self.kurallar)
@@ -96,13 +96,13 @@ def menu():
             print("[*] İzleme başlatıldı (Durdurmak için Ctrl+C)...")
             handler = LogIzleyici(kurallar)
             obs = Observer()
-            obs.schdule(handler, path=dizin, recursive=False)
+            obs.schedule(handler, path=dizin, recursive=False)
             obs.start()
             try:
                 while True: time.sleep(1)
             except KeyboardInterrupt:
                 obs.stop()
-            obs.join
+            obs.join()
         
         elif secim == "3":
             break

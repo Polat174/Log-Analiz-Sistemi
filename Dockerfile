@@ -7,6 +7,6 @@ RUN pip install --no-cache-dir -r gereksinimler.txt
 
 COPY . .
 
-RUN mkdir -p /var/log/host_log
+RUN mkdir -p /var/log/host_logs
 
 CMD ["python", "main.py"]
