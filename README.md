@@ -7,3 +7,8 @@ Projeyi Docker üzerinden ayağa kaldırmak için:
 
 ```bash
 docker-compose up --build
+
+Programı interaktif modda çalıştırmak için: 
+
+```bash
+docker compose run -it log-analyzer
