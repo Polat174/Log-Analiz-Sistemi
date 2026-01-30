@@ -6,6 +6,7 @@ import os
 from datetime import datetime
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+from collections import Counter
 
 #--- KURALLARIN HAZIRLANMASI ---
 def kural_yukle(kural_dosya="kurallar.yaml"):
@@ -75,6 +76,15 @@ class LogIzleyici(FileSystemEventHandler):
                     if sonuc:
                         print(f"\n[!] YENİ TESPİT: {sonuc['kural']} ({sonuc['derece']})")
                         print(f"--> {sonuc['mesaj']}")
+
+#--- Hata sayısını göster---
+
+def ozet_goster(tespitler):
+    sayac = Counter([t["kural"] for t in tespitler])
+    print("\n--- Olay Özeti ---")
+    for kural, adet in sayac.items():
+        print(f"{kural}:{adet}")
+
 #--- ANA MENÜ ---
 def menu():
     kurallar = kural_yukle()
@@ -97,7 +107,8 @@ def menu():
                         res = satir_analiz_et(satir, kurallar)
                         if res: tespitler.append(res)
 
-                print(f"\n Analiz bitti. {len(tespitler)}zafiyet bulundu.")
+                print(f"\n Analiz bitti. {len(tespitler)} zafiyet bulundu.")
+                ozet_goster(tespitler)
                 rapor_kaydet(tespitler)
             else:
                 print("[!] Dosya Bulunamadi!")
