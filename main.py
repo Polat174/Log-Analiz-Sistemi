@@ -54,30 +54,55 @@ def rapor_kaydet(tespitler, dosya_adi="Analiz_Raporu.csv"):
         writer.writerows(tespitler)
     print(f"\n[+] Rapor Kaydedildi: {os.path.abspath(dosya_adi)}")
 
-#--- GERÇEK ZAMANLI İZLEME (WATCHDOG) ---
+#--- GERÇEK ZAMANLI İZLEME (GÜÇLENDİRİLMİŞ VERSİYON) ---
 class LogIzleyici(FileSystemEventHandler):
     def __init__(self, kurallar):
         self.kurallar = kurallar
         self.offsets = {}
-    def on_modified(self,event):
-        if not event.is_directory:
-            path = event.src_path
 
+    def on_modified(self, event):
+        if event.is_directory:
+            return
+
+        path = event.src_path
+        
+        # Sadece log veya txt dosyalarina odaklan
+        if not (path.endswith(".log") or path.endswith(".txt")):
+            return
+
+        try:
             if path not in self.offsets:
                 self.offsets[path] = 0
 
-            with open(path, "r") as f:
+            # Dosya kuculmusse offset'i sifirla
+            if os.path.getsize(path) < self.offsets[path]:
+                self.offsets[path] = 0
+
+            # 'errors=ignore' ekledik ki garip karakterlerde patlamasin
+            with open(path, "r", encoding="utf-8", errors="ignore") as f:
                 f.seek(self.offsets[path])
                 yeni_satirlar = f.readlines()
                 self.offsets[path] = f.tell()
 
+                if not yeni_satirlar:
+                    return
+
+                # DEBUG: Okunan satır sayısını göster
+                print(f"[DEBUG] {len(yeni_satirlar)} yeni satır okundu.")
+
                 for satir in yeni_satirlar:
-                    sonuc =satir_analiz_et(satir, self.kurallar)
+                    sonuc = satir_analiz_et(satir, self.kurallar)
+                    
                     if sonuc:
                         print(f"\n[!] YENİ TESPİT: {sonuc['kural']} ({sonuc['derece']})")
                         print(f"--> {sonuc['mesaj']}")
-
                         rapor_kaydet([sonuc])
+                    else:
+                        # DEBUG: Eşleşmeyen satırları da göster ki hatayı bulalım
+                        print(f"[DEBUG - EŞLEŞME YOK]: {satir.strip()}")
+
+        except Exception as e:
+            print(f"[HATA] Dosya okuma hatası: {e}")
 
 #--- Hata sayısını göster---
 
