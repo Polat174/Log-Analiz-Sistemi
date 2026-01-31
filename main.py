@@ -77,6 +77,8 @@ class LogIzleyici(FileSystemEventHandler):
                         print(f"\n[!] YENİ TESPİT: {sonuc['kural']} ({sonuc['derece']})")
                         print(f"--> {sonuc['mesaj']}")
 
+                        rapor_kaydet([sonuc])
+
 #--- Hata sayısını göster---
 
 def ozet_goster(tespitler):
